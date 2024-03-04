@@ -1,12 +1,11 @@
 import numpy as np
 import random
 import pygame
-import sys
 
 class SpawnObject:
 
-    def __init__(self, GRID_WIDTH, GRID_HEIGHT, color):
-        self.start_pos = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
+    def __init__(self, start_position, color):
+        self.start_pos = start_position
         self.color = color
 
     def matrix_glider(self):

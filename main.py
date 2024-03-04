@@ -1,22 +1,20 @@
 import pygame
 import random
-import numpy as np
 from spawnobject import SpawnObject, FPS
-import sys
 
 pygame.init()
 
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
-DARKER_GREY = (120, 120, 120)
+DARKER_GREY = (126, 126, 126)
 YELLOW = (255, 255, 0)
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
-WIDTH, HEIGHT = 1280, 720
-TILE_SIZE = 10
+WIDTH, HEIGHT = 1920, 1080
+TILE_SIZE = 4
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 
@@ -82,7 +80,7 @@ def main():
     playing = False
     count = 0
     fps = FPS(BLACK)
-    update_freq = 12
+    update_freq = 6
 
     positions = set()
     while running:
@@ -100,7 +98,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            
+
+            '''
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 col = x // TILE_SIZE
@@ -111,7 +110,17 @@ def main():
                     positions.remove(pos)
                 else:
                     positions.add(pos)
-            
+            '''
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                col = x // TILE_SIZE
+                row = y // TILE_SIZE
+                start_position = (col, row)
+                glider = SpawnObject(start_position, GREEN).matrix_glider()
+                for position in glider:
+                    positions.add(position)
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     playing = not playing
@@ -123,12 +132,14 @@ def main():
 
                 ### start own code ###
                 if event.key == pygame.K_s:
-                    glider = SpawnObject(GRID_WIDTH, GRID_HEIGHT, BLUE).matrix_glider()
+                    start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
+                    glider = SpawnObject(start_position, GREEN).matrix_glider()
                     for position in glider:
                         positions.add(position)
 
                 if event.key == pygame.K_a:
-                    pento = SpawnObject(GRID_WIDTH, GRID_HEIGHT, GREEN).matrix_rpentomino()
+                    start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
+                    pento = SpawnObject(start_position, GREEN).matrix_rpentomino()
                     for position in pento:
                         positions.add(position)
 

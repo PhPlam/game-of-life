@@ -1,6 +1,9 @@
+# date: 06. march 2024
+
 import numpy as np
 import random
 import pygame
+
 
 class SpawnObject:
 
@@ -33,7 +36,19 @@ class SpawnObject:
  
         object_matrix = np.rot90(object_matrix, random.randint(0,3))
         positions_on_grid = self.set_positions(object_matrix)
-        return positions_on_grid 
+        return positions_on_grid
+
+    def matrix_table(self):
+        # Table
+        # 1|1|1|1
+        # 1|0|0|1
+
+        object_matrix = np.array([[1, 1, 1, 1],
+                                  [1, 0, 0, 1]]).T
+
+        object_matrix = np.rot90(object_matrix, random.randint(0, 3))
+        positions_on_grid = self.set_positions(object_matrix)
+        return positions_on_grid
 
     def set_positions(self, object_matrix):       
         positions_set = set()

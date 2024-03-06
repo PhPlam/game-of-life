@@ -1,3 +1,5 @@
 venv_gol/*
 __pycache__/*
 .idea/*
+audio/*
+test_scripts/test_audio/*

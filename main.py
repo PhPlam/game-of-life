@@ -1,6 +1,10 @@
+# date: 06. march 2024
+
 import pygame
 import random
 from spawnobject import SpawnObject, FPS
+import librosa
+from pygame import mixer
 
 pygame.init()
 
@@ -8,17 +12,17 @@ BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
 DARKER_GREY = (126, 126, 126)
 YELLOW = (255, 255, 0)
-
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
 WIDTH, HEIGHT = 1920, 1080
-TILE_SIZE = 4
+TILE_SIZE = 10
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
 
 def draw_grid(positions):
     for position in positions:
@@ -31,6 +35,7 @@ def draw_grid(positions):
 
     for col in range(GRID_WIDTH):
         pygame.draw.line(screen, DARKER_GREY, (col * TILE_SIZE, 0), (col * TILE_SIZE, HEIGHT))
+
 
 def adjust_grid(positions):
     all_neighbors = set()
@@ -59,6 +64,7 @@ def adjust_grid(positions):
     
     return new_positions
 
+
 def get_neighbors(pos):
     x, y, color = pos
     neighbors = []
@@ -75,17 +81,36 @@ def get_neighbors(pos):
     
     return neighbors
 
+
+def detect_beats(audio):
+    y, sr = librosa.load(audio)
+    o_env = librosa.onset.onset_strength(y=y, sr=sr)
+    times = librosa.times_like(o_env, sr=sr)
+    _, beats = librosa.beat.beat_track(y=y, sr=sr)
+    beats = [round(x, 2) for x in times[beats]]
+    return beats
+
+
 def main():
     running = True
-    playing = False
+    playing = True
     count = 0
     fps = FPS(BLACK)
-    update_freq = 6
+    update_freq = 12
+    play_music = True
+
+    if play_music:
+        audio = "audio/lofi_no_copyright.mp3"
+        stream_time = 0
+        beats = detect_beats(audio)
+        mixer.music.load(audio)
+        mixer.music.play()
 
     positions = set()
+
     while running:
-        fps.clock.tick(60)
-        
+        fps.clock.tick(120)
+
         if playing:
             count += 1
         
@@ -95,22 +120,18 @@ def main():
 
         pygame.display.set_caption("Playing" if playing else "Paused")
 
+        last_stream_time = stream_time
+        stream_time = round(pygame.mixer.music.get_pos() / 1000, 2)
+        print(stream_time)
+        if stream_time > last_stream_time and stream_time in beats:
+            start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
+            obj = SpawnObject(start_position, GREEN).matrix_table()
+            for position in obj:
+                positions.add(position)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-            '''
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                col = x // TILE_SIZE
-                row = y // TILE_SIZE
-                pos = (col, row, RED)
-
-                if pos in positions:
-                    positions.remove(pos)
-                else:
-                    positions.add(pos)
-            '''
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
@@ -153,6 +174,7 @@ def main():
         pygame.display.update()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()

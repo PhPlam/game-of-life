@@ -1,4 +1,4 @@
-# date: 06. march 2024
+# date: 08. march 2024
 
 import pygame
 import random

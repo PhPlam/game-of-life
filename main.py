@@ -8,19 +8,21 @@ from pygame import mixer
 
 pygame.init()
 
+# color for FPS clock
 BLACK = (0, 0, 0)
-GREY = (128, 128, 128)
-DARKER_GREY = (126, 126, 126)
+# colors for screen (GREY) and grid (DARKER GREY)
+GREY = (180, 180, 180)
+DARKER_GREY = (178, 178, 178)
+# colors for objects
 YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-
-WIDTH, HEIGHT = 1920, 1080
-TILE_SIZE = 10
+# define screen
+WIDTH, HEIGHT = 1280, 720
+TILE_SIZE = 5
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
-
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
@@ -82,34 +84,47 @@ def get_neighbors(pos):
     return neighbors
 
 
+# load audio and return detected tempo and beats
 def detect_beats(audio):
     y, sr = librosa.load(audio)
     o_env = librosa.onset.onset_strength(y=y, sr=sr)
     times = librosa.times_like(o_env, sr=sr)
-    _, beats = librosa.beat.beat_track(y=y, sr=sr)
-    beats = [round(x, 2) for x in times[beats]]
-    return beats
+    tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+    beats = [round(x, 1) for x in times[beats]]
+    return beats, tempo
+
+
+# create a random RGB tuple
+def random_color():
+    return tuple(random.sample(range(256), 3))
 
 
 def main():
+    # init game as running
     running = True
     playing = True
+    # init counter
     count = 0
+    stream_time = 0
+    # init fps clock
     fps = FPS(BLACK)
-    update_freq = 12
-    play_music = True
-
-    if play_music:
-        audio = "audio/lofi_no_copyright.mp3"
-        stream_time = 0
-        beats = detect_beats(audio)
-        mixer.music.load(audio)
-        mixer.music.play()
-
+    # set anticipated framerate
+    framerate = 120
+    # select audio
+    audio = "audio/doiwannaknow.mp3"
+    # get bpm(tempo) and time where beat occurs (as list of timepoints)
+    beats, tempo = detect_beats(audio)
+    # play music
+    mixer.music.load(audio)
+    mixer.music.play()
+    # screen updates should fit to beat so adjust update frequency
+    # fps = bpm * 0.01667
+    update_freq = int(round((framerate/(tempo*0.01667))/4, 0))
+    # init positions as empty set
     positions = set()
 
     while running:
-        fps.clock.tick(120)
+        fps.clock.tick(framerate)
 
         if playing:
             count += 1
@@ -120,12 +135,15 @@ def main():
 
         pygame.display.set_caption("Playing" if playing else "Paused")
 
+        # get current streaming time and compare to last one
+        # if current streaming time greater and time is in list of detected beats
+        # create object at a random position (but not at border)
         last_stream_time = stream_time
-        stream_time = round(pygame.mixer.music.get_pos() / 1000, 2)
-        print(stream_time)
+        stream_time = round(pygame.mixer.music.get_pos() / 1000, 1)
         if stream_time > last_stream_time and stream_time in beats:
-            start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
-            obj = SpawnObject(start_position, GREEN).matrix_table()
+            start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
+                              random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
+            obj = SpawnObject(start_position, random_color()).matrix_table()
             for position in obj:
                 positions.add(position)
 
@@ -148,10 +166,7 @@ def main():
                 
                 if event.key == pygame.K_c:
                     positions = set()
-                    playing = False
-                    count = 0
 
-                ### start own code ###
                 if event.key == pygame.K_s:
                     start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
                     glider = SpawnObject(start_position, GREEN).matrix_glider()
@@ -163,10 +178,6 @@ def main():
                     pento = SpawnObject(start_position, GREEN).matrix_rpentomino()
                     for position in pento:
                         positions.add(position)
-
-                if event.key == pygame.K_t:
-                    positions.add((2,1, GREEN))
-                ### end own code ###
          
         screen.fill(GREY)
         draw_grid(positions)

@@ -43,6 +43,7 @@ def draw_grid(positions):
 def adjust_grid(positions):
     all_neighbors = set()
     new_positions = set()
+    change_color = False
 
     positions_wo_colors = {(pos[0], pos[1]) for pos in positions}
 
@@ -63,8 +64,19 @@ def adjust_grid(positions):
         common_neighbors = positions_wo_colors & neighbors_wo_colors
 
         if len(common_neighbors) == 3:
+            if change_color:
+                neighbors_list = [neigh[:2] for neigh in all_neighbors]
+                if neighbors_list.count(position[:2]) > 1:
+                    color_set = set()
+                    for index, ele in enumerate(neighbors_list):
+                        if ele == position[:2]:
+                            color_set.add(list(all_neighbors)[index][2])
+                    colors_zip = zip(*color_set)
+                    color_average = tuple(sum(column) / len(color_set) for column in colors_zip)
+                    position = (position[0], position[1], color_average)
+
             new_positions.add(position)
-    
+
     return new_positions
 
 
@@ -135,8 +147,8 @@ def main():
             count = 0
             positions = adjust_grid(positions)
             end = time.time()
-            duration = round(end - start, 3)
-            #print('duration: ', duration)
+            duration = round(end - start, 6)
+            #print('num positions: ', len(positions),' duration: ', duration)
             # if processing takes to long the fps drops
             # so remove some of the positions to decrease calculation
             if duration > 0.03:

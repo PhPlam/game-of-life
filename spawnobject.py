@@ -29,7 +29,6 @@ class SpawnObject:
         # 0|1|1
         # 1|1|0
         # 0|1|0
-
         object_matrix = np.array([[0,1,1],
                                   [1,1,0],
                                   [0,1,0]]).T
@@ -42,7 +41,6 @@ class SpawnObject:
         # Table
         # 1|1|1|1
         # 1|0|0|1
-
         object_matrix = np.array([[1, 1, 1, 1],
                                   [1, 0, 0, 1]]).T
 

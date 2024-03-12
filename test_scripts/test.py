@@ -6,8 +6,16 @@ import numpy as np
 from datetime import datetime
 import numpy as np
 
-#print(tuple(np.random.choice(range(256), size=3)))
-print(tuple(random.sample(range(256), 3)))
+set_of_tuples = {(1, 2, 3), (4, 5, 6), (7, 8, 9), (120, 12, 23)}
+
+# Transpose the set of tuples
+transposed_tuples = zip(*set_of_tuples)
+
+# Calculate the element-wise average
+average_tuple = tuple(sum(column) / len(set_of_tuples) for column in transposed_tuples)
+
+print("Element-wise average tuple:", average_tuple)
+
 '''
 y, sr = librosa.load('test_audio/lofi_no_copyright.mp3')#, duration=5)
 o_env = librosa.onset.onset_strength(y=y, sr=sr)

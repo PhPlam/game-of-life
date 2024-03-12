@@ -20,7 +20,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 # define screen
 WIDTH, HEIGHT = 1280, 720
-TILE_SIZE = 5
+TILE_SIZE = 8
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -43,25 +43,26 @@ def adjust_grid(positions):
     all_neighbors = set()
     new_positions = set()
 
+    positions_wo_colors = {(pos[0], pos[1]) for pos in positions}
+
     for position in positions:
         neighbors = get_neighbors(position)
         all_neighbors.update(neighbors)
 
-        neighbors = list(filter(lambda x: x in positions, neighbors))
-        # works but slow
-        #neighbors = list(filter(lambda x: x in [pos[:2] for pos in positions], [neigh[:2] for neigh in neighbors]))
+        neighbors_wo_colors = {(neigh[0], neigh[1]) for neigh in neighbors}
+        common_neighbors = positions_wo_colors & neighbors_wo_colors
 
-        if len(neighbors) in [2, 3]:
+        if len(common_neighbors) in [2, 3]:
+            print(neighbors)
             new_positions.add(position)
     
     for position in all_neighbors:
         neighbors = get_neighbors(position)
-        
-        neighbors = list(filter(lambda x: x in positions, neighbors))
-        # works but slow
-        #neighbors = list(filter(lambda x: x in [pos[:2] for pos in positions], [neigh[:2] for neigh in neighbors]))
 
-        if len(neighbors) == 3:
+        neighbors_wo_colors = {(neigh[0], neigh[1]) for neigh in neighbors}
+        common_neighbors = positions_wo_colors & neighbors_wo_colors
+
+        if len(common_neighbors) == 3:
             new_positions.add(position)
     
     return new_positions
@@ -69,7 +70,7 @@ def adjust_grid(positions):
 
 def get_neighbors(pos):
     x, y, color = pos
-    neighbors = []
+    neighbors = set()
     for dx in [-1, 0, 1]:
         if x + dx < 0 or x + dx > GRID_WIDTH:
             continue
@@ -79,7 +80,7 @@ def get_neighbors(pos):
             if dx == 0 and dy == 0:
                 continue
 
-            neighbors.append((x + dx, y + dy, color))
+            neighbors.add((x + dx, y + dy, color))
     
     return neighbors
 
@@ -96,7 +97,7 @@ def detect_beats(audio):
 
 # create a random RGB tuple
 def random_color():
-    return tuple(random.sample(range(256), 3))
+    return tuple(random.sample(range(100, 150), 3))
 
 
 def main():
@@ -109,7 +110,7 @@ def main():
     # init fps clock
     fps = FPS(BLACK)
     # set anticipated framerate
-    framerate = 120
+    framerate = 30
     # select audio
     audio = "audio/doiwannaknow.mp3"
     # get bpm(tempo) and time where beat occurs (as list of timepoints)

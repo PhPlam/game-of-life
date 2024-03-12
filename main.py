@@ -5,6 +5,7 @@ import random
 from spawnobject import SpawnObject, FPS
 import librosa
 from pygame import mixer
+import time
 
 pygame.init()
 
@@ -53,9 +54,8 @@ def adjust_grid(positions):
         common_neighbors = positions_wo_colors & neighbors_wo_colors
 
         if len(common_neighbors) in [2, 3]:
-            print(neighbors)
             new_positions.add(position)
-    
+
     for position in all_neighbors:
         neighbors = get_neighbors(position)
 
@@ -131,8 +131,17 @@ def main():
             count += 1
         
         if count >= update_freq:
+            start = time.time()
             count = 0
             positions = adjust_grid(positions)
+            end = time.time()
+            duration = round(end - start, 3)
+            #print('duration: ', duration)
+            # if processing takes to long the fps drops
+            # so remove some of the positions to decrease calculation
+            if duration > 0.03:
+                num = int(0.25*len(positions))
+                [positions.pop() for n in range(num)]
 
         pygame.display.set_caption("Playing" if playing else "Paused")
 

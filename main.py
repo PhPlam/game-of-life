@@ -6,6 +6,7 @@ from spawnobject import SpawnObject, FPS
 import librosa
 from pygame import mixer
 import time
+import numpy as np
 
 pygame.init()
 
@@ -21,7 +22,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 # define screen
 WIDTH, HEIGHT = 1280, 720
-TILE_SIZE = 8
+TILE_SIZE = 10
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -43,10 +44,11 @@ def draw_grid(positions):
 def adjust_grid(positions):
     all_neighbors = set()
     new_positions = set()
-    change_color = False
-
     positions_wo_colors = {(pos[0], pos[1]) for pos in positions}
 
+    # calculate if existing position still exists in next step
+    # rule 1: a cell deactivates if it has less than 2 or more than 3 active neighbors
+    # rule 2: a cell stays active if it has 2 or 3 active neighbors
     for position in positions:
         neighbors = get_neighbors(position)
         all_neighbors.update(neighbors)
@@ -57,6 +59,25 @@ def adjust_grid(positions):
         if len(common_neighbors) in [2, 3]:
             new_positions.add(position)
 
+    # Create a dictionary to store unique positions as keys and their corresponding colors as values
+    position_colors = {}
+    for neigh in all_neighbors:
+        position_key = tuple(neigh[:2])
+        color = neigh[2]
+        if position_key not in position_colors:
+            position_colors[position_key] = [color]
+        else:
+            position_colors[position_key].append(color)
+
+    # Update position colors with the average color
+    for key, colors in position_colors.items():
+        if colors and len(colors) > 1:
+            # Calculate average color using NumPy
+            color_average = tuple(int(sum(channel) / len(colors)) for channel in zip(*colors))
+            position_colors[key] = color_average
+
+    # calculate if non-existing position will exist in next step
+    # rule 3: a deactivated cell will activate if it has 3 active neighbors
     for position in all_neighbors:
         neighbors = get_neighbors(position)
 
@@ -64,17 +85,8 @@ def adjust_grid(positions):
         common_neighbors = positions_wo_colors & neighbors_wo_colors
 
         if len(common_neighbors) == 3:
-            if change_color:
-                neighbors_list = [neigh[:2] for neigh in all_neighbors]
-                if neighbors_list.count(position[:2]) > 1:
-                    color_set = set()
-                    for index, ele in enumerate(neighbors_list):
-                        if ele == position[:2]:
-                            color_set.add(list(all_neighbors)[index][2])
-                    colors_zip = zip(*color_set)
-                    color_average = tuple(sum(column) / len(color_set) for column in colors_zip)
-                    position = (position[0], position[1], color_average)
-
+            if position_colors[position[:2]] and position_colors[position[:2]][0] != position[2]:
+                position = (position[0], position[1], position_colors[position[:2]])
             new_positions.add(position)
 
     return new_positions
@@ -148,11 +160,11 @@ def main():
             positions = adjust_grid(positions)
             end = time.time()
             duration = round(end - start, 6)
-            #print('num positions: ', len(positions),' duration: ', duration)
+            print('num positions: ', len(positions),' duration: ', duration)
             # if processing takes to long the fps drops
             # so remove some of the positions to decrease calculation
             if duration > 0.03:
-                num = int(0.25*len(positions))
+                num = int(0.5*len(positions))
                 [positions.pop() for n in range(num)]
 
         pygame.display.set_caption("Playing" if playing else "Paused")
@@ -163,11 +175,12 @@ def main():
         last_stream_time = stream_time
         stream_time = round(pygame.mixer.music.get_pos() / 1000, 1)
         if stream_time > last_stream_time and stream_time in beats:
-            start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
-                              random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
-            obj = SpawnObject(start_position, random_color()).matrix_table()
-            for position in obj:
-                positions.add(position)
+            print()
+            #start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
+            #                  random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
+            #obj = SpawnObject(start_position, random_color()).matrix_table()
+            #for position in obj:
+            #    positions.add(position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -178,8 +191,8 @@ def main():
                 col = x // TILE_SIZE
                 row = y // TILE_SIZE
                 start_position = (col, row)
-                glider = SpawnObject(start_position, GREEN).matrix_glider()
-                for position in glider:
+                new_object = SpawnObject(start_position, RED).matrix_block()
+                for position in new_object:
                     positions.add(position)
 
             if event.type == pygame.KEYDOWN:

@@ -6,15 +6,8 @@ import numpy as np
 from datetime import datetime
 import numpy as np
 
-set_of_tuples = {(1, 2, 3), (4, 5, 6), (7, 8, 9)}
+a = {(3, 2, (138, 93, 0)), (2, 2, (137, 93, 0)), (2, 1, (137, 94, 0)), (3, 2, (137, 93, 0)), (3, 1, (137, 94, 0)), (2, 2, (138, 92, 0)), (2, 1, (137, 93, 0)), (3, 1, (137, 93, 0))}
 
-# Transpose the set of tuples
-transposed_tuples = zip(*set_of_tuples)
-
-# Calculate the element-wise average
-average_tuple = tuple(sum(column) / len(set_of_tuples) for column in transposed_tuples)
-
-print("Element-wise average tuple:", average_tuple)
 
 '''
 y, sr = librosa.load('test_audio/lofi_no_copyright.mp3')#, duration=5)

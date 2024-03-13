@@ -48,6 +48,19 @@ class SpawnObject:
         positions_on_grid = self.set_positions(object_matrix)
         return positions_on_grid
 
+
+    def matrix_block(self):
+        # Table
+        # 1|1
+        # 1|1
+        object_matrix = np.array([[1, 1],
+                                  [1, 1]]).T
+
+        object_matrix = np.rot90(object_matrix, random.randint(0, 3))
+        positions_on_grid = self.set_positions(object_matrix)
+        return positions_on_grid
+
+
     def set_positions(self, object_matrix):       
         positions_set = set()
         for i in range(np.shape(object_matrix)[0]):

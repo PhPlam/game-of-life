@@ -77,9 +77,6 @@ def adjust_grid(positions):
             color_average = tuple(int(sum(channel) / len(colors)) for channel in zip(*colors))
             position_colors[key] = color_average
 
-    #print(position_colors)
-    print(len(new_positions))
-
     # calculate if non-existing position will exist in next step
     # rule 3: a deactivated cell will activate if it has 3 active neighbors
     for position in all_neighbors:
@@ -94,7 +91,6 @@ def adjust_grid(positions):
                     position = (position[0], position[1], position_colors[position[:2]])
                 new_positions.add(position)
 
-    print(len(new_positions))
     return new_positions
 
 
@@ -181,12 +177,11 @@ def main():
         last_stream_time = stream_time
         stream_time = round(pygame.mixer.music.get_pos() / 1000, 1)
         if stream_time > last_stream_time and stream_time in beats:
-            i = 0 #print()
-            #start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
-            #                  random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
-            #obj = SpawnObject(start_position, random_color()).matrix_table()
-            #for position in obj:
-            #    positions.add(position)
+            start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
+                              random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
+            obj = SpawnObject(start_position, random_color()).matrix_table()
+            for position in obj:
+                positions.add(position)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

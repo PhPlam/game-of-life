@@ -6,20 +6,19 @@ from spawnobject import SpawnObject, FPS
 import librosa
 from pygame import mixer
 import time
-import numpy as np
 
 pygame.init()
 
 # color for FPS clock
 BLACK = (0, 0, 0)
 # colors for screen (GREY) and grid (DARKER GREY)
-GREY = (180, 180, 180)
-DARKER_GREY = (178, 178, 178)
+GREY = (225, 225, 225)
+DARKER_GREY = (222, 222, 222)
 # colors for objects
-YELLOW = (255, 255, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+YELLOW = (200, 200, 0)
+RED = (200, 0, 0)
+GREEN = (0, 200, 0)
+BLUE = (0, 0, 200)
 # define screen
 WIDTH, HEIGHT = 1280, 720
 TILE_SIZE = 10
@@ -59,6 +58,8 @@ def adjust_grid(positions):
         if len(common_neighbors) in [2, 3]:
             new_positions.add(position)
 
+    new_positions_wo_colors = [pos[:2] for pos in new_positions]
+
     # Create a dictionary to store unique positions as keys and their corresponding colors as values
     position_colors = {}
     for neigh in all_neighbors:
@@ -76,19 +77,24 @@ def adjust_grid(positions):
             color_average = tuple(int(sum(channel) / len(colors)) for channel in zip(*colors))
             position_colors[key] = color_average
 
+    #print(position_colors)
+    print(len(new_positions))
+
     # calculate if non-existing position will exist in next step
     # rule 3: a deactivated cell will activate if it has 3 active neighbors
     for position in all_neighbors:
-        neighbors = get_neighbors(position)
+        if position[:2] not in new_positions_wo_colors:
+            neighbors = get_neighbors(position)
 
-        neighbors_wo_colors = {(neigh[0], neigh[1]) for neigh in neighbors}
-        common_neighbors = positions_wo_colors & neighbors_wo_colors
+            neighbors_wo_colors = {(neigh[0], neigh[1]) for neigh in neighbors}
+            common_neighbors = positions_wo_colors & neighbors_wo_colors
 
-        if len(common_neighbors) == 3:
-            if position_colors[position[:2]] and position_colors[position[:2]][0] != position[2]:
-                position = (position[0], position[1], position_colors[position[:2]])
-            new_positions.add(position)
+            if len(common_neighbors) == 3:
+                if position_colors[position[:2]] and position_colors[position[:2]][0] != position[2]:
+                    position = (position[0], position[1], position_colors[position[:2]])
+                new_positions.add(position)
 
+    print(len(new_positions))
     return new_positions
 
 
@@ -175,7 +181,7 @@ def main():
         last_stream_time = stream_time
         stream_time = round(pygame.mixer.music.get_pos() / 1000, 1)
         if stream_time > last_stream_time and stream_time in beats:
-            print()
+            i = 0 #print()
             #start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
             #                  random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))
             #obj = SpawnObject(start_position, random_color()).matrix_table()
@@ -213,6 +219,18 @@ def main():
                     pento = SpawnObject(start_position, GREEN).matrix_rpentomino()
                     for position in pento:
                         positions.add(position)
+
+                ### test keys ###
+                if event.key == pygame.K_t:
+                    new_object = {(50, 50, RED), (51, 50, RED), (51, 51, GREEN), (50, 51, GREEN)}
+                    for position in new_object:
+                        positions.add(position)
+
+                if event.key == pygame.K_r:
+                    new_object = {(50, 50, RED), (51, 51, GREEN), (51, 52, RED), (50, 52, GREEN), (49, 52, GREEN)}#, (51, 51, GREEN), (50, 51, GREEN)}
+                    for position in new_object:
+                        positions.add(position)
+                ######
          
         screen.fill(GREY)
         draw_grid(positions)

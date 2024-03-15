@@ -9,6 +9,16 @@
 - "Spiel" = Geschehen, das nach festgelegten einfachen Regeln abläuft
 
 ## Spielfeld
-- 
+
+- Spielfeld besteht aus Zeilen und Spalten
+- jedes Gitterquadrat (Zelle) ist ein zellulärer Automat
+- eine Zelle kann zwei Zustände einnehmen (aktiv oder inaktiv)
+
+## Spielregeln
+- eine inaktive Zelle mit genau drei aktiven Nachbarn wird aktiv (Geburt)
+- eine aktive Zelle mit weniger als zwei aktiven Nachbarn wird inaktiv (Einsamkeit)
+- eine aktive Zelle mit zwei oder drei aktiven Nachbarn bleibt aktiv
+- eine aktive Zelle mit mehr als drei aktiven Nachbarn wird inaktiv (Überbevölkerung)
+
 
 

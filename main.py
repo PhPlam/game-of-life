@@ -123,7 +123,7 @@ def detect_beats(audio):
 
 # create a random RGB tuple
 def random_color():
-    return tuple(random.sample(range(100, 150), 3))
+    return tuple(random.sample(range(50, 200), 3))
 
 
 def main():
@@ -138,7 +138,7 @@ def main():
     # set anticipated framerate
     framerate = 30
     # select audio
-    audio = "audio/doiwannaknow.mp3"
+    audio = "audio/lofi_no_copyright.mp3"
     # get bpm(tempo) and time where beat occurs (as list of timepoints)
     beats, tempo = detect_beats(audio)
     # play music
@@ -146,9 +146,13 @@ def main():
     mixer.music.play()
     # screen updates should fit to beat so adjust update frequency
     # fps = bpm * 0.01667
-    update_freq = int(round((framerate/(tempo*0.01667))/4, 0))
+    update_freq = int(round((framerate/(tempo*0.01667))/2, 0))
     # init positions as empty set
     positions = set()
+    # define maximum duration of one loop (if longer fps drops)
+    # and factor to reduce positions as consequence
+    duration_max = 0.033
+    reduce = 0.25
 
     while running:
         fps.clock.tick(framerate)
@@ -165,8 +169,8 @@ def main():
             print('num positions: ', len(positions),' duration: ', duration)
             # if processing takes to long the fps drops
             # so remove some of the positions to decrease calculation
-            if duration > 0.03:
-                num = int(0.5*len(positions))
+            if duration > duration_max:
+                num = int(reduce*len(positions))
                 [positions.pop() for n in range(num)]
 
         pygame.display.set_caption("Playing" if playing else "Paused")

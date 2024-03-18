@@ -1,4 +1,4 @@
-# date: 15. march 2024
+# date: 18. march 2024
 
 import pygame
 import random
@@ -8,6 +8,8 @@ from pygame import mixer
 import time
 
 pygame.init()
+# uncomment to remove mouse from screen
+#pygame.mouse.set_visible(False)
 
 # color for FPS clock
 BLACK = (0, 0, 0)
@@ -20,7 +22,7 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 BLUE = (0, 0, 200)
 # define screen
-WIDTH, HEIGHT = 1280, 720
+WIDTH, HEIGHT = 1920, 1080
 TILE_SIZE = 10
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
@@ -196,7 +198,7 @@ def main():
                 col = x // TILE_SIZE
                 row = y // TILE_SIZE
                 start_position = (col, row)
-                new_object = SpawnObject(start_position, RED).matrix_block()
+                new_object = SpawnObject(start_position, random_color()).matrix_glider()
                 for position in new_object:
                     positions.add(position)
 

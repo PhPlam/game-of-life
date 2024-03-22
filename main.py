@@ -168,7 +168,7 @@ def main():
             positions = adjust_grid(positions)
             end = time.time()
             duration = round(end - start, 6)
-            print('num positions: ', len(positions),' duration: ', duration)
+            #print('num positions: ', len(positions),' duration: ', duration)
             # if processing takes to long the fps drops
             # so remove some of the positions to decrease calculation
             if duration > duration_max:

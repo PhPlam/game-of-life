@@ -1,4 +1,4 @@
-# date: 15. march 2024
+# date: 28. march 2024
 
 import numpy as np
 import random
@@ -73,10 +73,10 @@ class SpawnObject:
 class FPS:
     def __init__(self, color):
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont("Verdana", 20)
+        self.font = pygame.font.SysFont("Verdana", 8)
         self.text = self.font.render(str(self.clock.get_fps()), True, color)
         self.color = color
  
-    def render(self, display):
-        self.text = self.font.render(str(round(self.clock.get_fps(),2)), True, self.color)
+    def render(self, display, audio_name):
+        self.text = self.font.render(audio_name + ' | ' + str(round(self.clock.get_fps(),1)), True, self.color)
         display.blit(self.text, (10, 10))

@@ -1,4 +1,4 @@
-# date: 18. march 2024
+# date: 28. march 2024
 
 import pygame
 import random
@@ -6,6 +6,7 @@ from spawnobject import SpawnObject, FPS
 import librosa
 from pygame import mixer
 import time
+import os
 
 pygame.init()
 # uncomment to remove mouse from screen
@@ -22,11 +23,12 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 BLUE = (0, 0, 200)
 # define screen
-WIDTH, HEIGHT = 1920, 1080
+WIDTH, HEIGHT = 1280, 720
 TILE_SIZE = 10
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# uncomment 'pygame.FULLSCREEN' for fullscreen picture
+screen = pygame.display.set_mode((WIDTH, HEIGHT))#, pygame.FULLSCREEN)
 
 
 def draw_grid(positions):
@@ -128,10 +130,19 @@ def random_color():
     return tuple(random.sample(range(50, 200), 3))
 
 
+# play audio
+def play_audio(path, audio):
+    # get bpm(tempo) and time where beat occurs (as list of timepoints)
+    beats, tempo = detect_beats(path + audio)
+    # play music
+    mixer.music.load(path + audio)
+    mixer.music.play()
+    return beats, tempo
+
+
 def main():
     # init game as running
     running = True
-    playing = True
     # init counter
     count = 0
     stream_time = 0
@@ -139,13 +150,11 @@ def main():
     fps = FPS(BLACK)
     # set anticipated framerate
     framerate = 30
-    # select audio
-    audio = "audio/lofi_no_copyright.mp3"
-    # get bpm(tempo) and time where beat occurs (as list of timepoints)
-    beats, tempo = detect_beats(audio)
-    # play music
-    mixer.music.load(audio)
-    mixer.music.play()
+    # select random audio file, play audio and get beat and tempo
+    path = 'audio/'
+    audio_files = os.listdir(path)
+    audio = random.choice(audio_files)
+    beats, tempo = play_audio(path, audio)
     # screen updates should fit to beat so adjust update frequency
     # fps = bpm * 0.01667
     update_freq = int(round((framerate/(tempo*0.01667))/2, 0))
@@ -155,12 +164,13 @@ def main():
     # and factor to reduce positions as consequence
     duration_max = 0.033
     reduce = 0.25
+    # create event when music stops playing
+    NEXT = pygame.USEREVENT + 1
+    pygame.mixer.music.set_endevent(NEXT)
 
     while running:
         fps.clock.tick(framerate)
-
-        if playing:
-            count += 1
+        count += 1
         
         if count >= update_freq:
             start = time.time()
@@ -174,8 +184,6 @@ def main():
             if duration > duration_max:
                 num = int(reduce*len(positions))
                 [positions.pop() for n in range(num)]
-
-        pygame.display.set_caption("Playing" if playing else "Paused")
 
         # get current streaming time and compare to last one
         # if current streaming time greater and time is in list of detected beats
@@ -193,6 +201,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            # start new when song is over
+            if event.type == NEXT:
+                main()
+
+            # left mouse - create glider
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 col = x // TILE_SIZE
@@ -203,39 +216,35 @@ def main():
                     positions.add(position)
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    playing = not playing
-                
+                # c - clear screen
                 if event.key == pygame.K_c:
                     positions = set()
 
-                if event.key == pygame.K_s:
+                # g - create random glider
+                if event.key == pygame.K_g:
                     start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
                     glider = SpawnObject(start_position, GREEN).matrix_glider()
                     for position in glider:
                         positions.add(position)
 
-                if event.key == pygame.K_a:
+                # p - create random r-pentomino
+                if event.key == pygame.K_p:
                     start_position = (random.randint(0, GRID_WIDTH), random.randint(0, GRID_HEIGHT))
                     pento = SpawnObject(start_position, GREEN).matrix_rpentomino()
                     for position in pento:
                         positions.add(position)
 
-                ### test keys ###
-                if event.key == pygame.K_t:
-                    new_object = {(50, 50, RED), (51, 50, RED), (51, 51, GREEN), (50, 51, GREEN)}
-                    for position in new_object:
-                        positions.add(position)
-
+                # r - reload game
                 if event.key == pygame.K_r:
-                    new_object = {(50, 50, RED), (51, 51, GREEN), (51, 52, RED), (50, 52, GREEN), (49, 52, GREEN)}#, (51, 51, GREEN), (50, 51, GREEN)}
-                    for position in new_object:
-                        positions.add(position)
-                ######
-         
+                    main()
+
+                # q - quit game
+                if event.key == pygame.K_q:
+                    running = False
+
         screen.fill(GREY)
         draw_grid(positions)
-        fps.render(screen)
+        fps.render(screen, audio)
         pygame.display.update()
 
     pygame.quit()

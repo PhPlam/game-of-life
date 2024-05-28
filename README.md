@@ -1,4 +1,5 @@
 # Game of Life: Factsheet
+Autor: Philipp Plamper
 Datum: 28. Mai 2024
 
 ## Entstehung

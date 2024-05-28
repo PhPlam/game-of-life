@@ -1,4 +1,4 @@
-# date: 28. march 2024
+# date: 28. may 2024
 
 import pygame
 import random
@@ -7,6 +7,7 @@ import librosa
 from pygame import mixer
 import time
 import os
+import numpy as np
 
 pygame.init()
 # uncomment to remove mouse from screen
@@ -23,8 +24,9 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 BLUE = (0, 0, 200)
 # define screen
-WIDTH, HEIGHT = 1280, 720
-TILE_SIZE = 10
+WIDTH, HEIGHT = 960, 1080 # HD
+#WIDTH, HEIGHT = 1920, 1080 # Full Screen
+TILE_SIZE = 15
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 # uncomment 'pygame.FULLSCREEN' for fullscreen picture
@@ -121,7 +123,7 @@ def detect_beats(audio):
     o_env = librosa.onset.onset_strength(y=y, sr=sr)
     times = librosa.times_like(o_env, sr=sr)
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
-    beats = [round(x, 1) for x in times[beats]]
+    beats = [np.round(x, 1) for x in times[beats]]
     return beats, tempo
 
 
@@ -157,7 +159,7 @@ def main():
     beats, tempo = play_audio(path, audio)
     # screen updates should fit to beat so adjust update frequency
     # fps = bpm * 0.01667
-    update_freq = int(round((framerate/(tempo*0.01667))/2, 0))
+    update_freq = int(np.round((framerate/(tempo*0.01667))/2, 0))
     # init positions as empty set
     positions = set()
     # define maximum duration of one loop (if longer fps drops)
@@ -177,7 +179,7 @@ def main():
             count = 0
             positions = adjust_grid(positions)
             end = time.time()
-            duration = round(end - start, 6)
+            duration = np.round(end - start, 6)
             #print('num positions: ', len(positions),' duration: ', duration)
             # if processing takes to long the fps drops
             # so remove some of the positions to decrease calculation
@@ -189,7 +191,7 @@ def main():
         # if current streaming time greater and time is in list of detected beats
         # create object at a random position (but not at border)
         last_stream_time = stream_time
-        stream_time = round(pygame.mixer.music.get_pos() / 1000, 1)
+        stream_time = np.round(pygame.mixer.music.get_pos() / 1000, 1)
         if stream_time > last_stream_time and stream_time in beats:
             start_position = (random.randint(int(0.05*GRID_WIDTH), int(0.95*GRID_WIDTH)),
                               random.randint(int(0.05*GRID_HEIGHT), int(0.95*GRID_HEIGHT)))

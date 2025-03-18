@@ -11,7 +11,7 @@ import numpy as np
 
 pygame.init()
 # uncomment to remove mouse from screen
-#pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(False)
 
 # color for FPS clock
 BLACK = (0, 0, 0)
@@ -24,8 +24,8 @@ RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 BLUE = (0, 0, 200)
 # define screen
-WIDTH, HEIGHT = 960, 1080 # HD
-#WIDTH, HEIGHT = 1920, 1080 # Full Screen
+#WIDTH, HEIGHT = 1280, 720 # HD
+WIDTH, HEIGHT = 1920, 1080 # Full Screen
 TILE_SIZE = 15
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
